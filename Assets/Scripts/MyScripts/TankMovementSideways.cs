@@ -11,15 +11,18 @@ public class TankMovementSideways : MonoBehaviour
     public AudioSource tankSound;
     public AudioClip tankIdle;
     public AudioClip tankMove;
+    public Rigidbody rb;
 
     float totalTime;
     float timeForFlip;
     public bool turnLeft;
     public bool turnRight;
-    public bool turnChassisLeft;
-    public bool turnChassisRight;
-    public bool lookingLeft;
-    public bool lookingRight;
+    bool turnChassisLeft;
+    bool turnChassisRight;
+    bool lookingLeft;
+    bool lookingRight;
+    bool slowDown;
+    float slowTime;
 
     // Start is called before the first frame update
     void Start()
@@ -37,6 +40,7 @@ public class TankMovementSideways : MonoBehaviour
 
         TankMovementLeftRight();
         TankTurretLeftRight();
+        TankJump();
     }
 
     void TankMovementLeftRight()
@@ -45,21 +49,50 @@ public class TankMovementSideways : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A) && lookingRight == true)
         {
             turnChassisLeft = true;
+            lookingRight = false;
         }
         else if(Input.GetKey(KeyCode.A) && lookingLeft == true)
         {
             tankMoveSide.Translate(new Vector3(-5f, 0, 0) * Time.deltaTime, Space.World);
             tankSound.clip = tankMove;
         }
+        if(Input.GetKeyUp(KeyCode.A) && lookingLeft == true)
+        {
+            slowTime = 3;
+            slowDown = true;
+        }
 
         if(Input.GetKeyDown(KeyCode.D) && lookingLeft == true)
         {
             turnChassisRight = true;
+            lookingLeft = false;
         }
         else if (Input.GetKey(KeyCode.D) && lookingRight == true)
         {
             tankMoveSide.Translate(new Vector3(5f, 0, 0) * Time.deltaTime, Space.World);
             tankSound.clip = tankMove;
+        }
+        if(Input.GetKeyUp(KeyCode.D) && lookingRight == true)
+        {
+            slowTime = 3;
+            slowDown = true;
+        }
+
+        if(slowDown == true)
+        {
+            slowTime -= Time.deltaTime * 15;
+            if(lookingLeft == true)
+            {
+                tankMoveSide.Translate(new Vector3(-slowTime, 0, 0) * Time.deltaTime, Space.World);
+            }
+            else if(lookingRight == true)
+            {
+                tankMoveSide.Translate(new Vector3(slowTime, 0, 0) * Time.deltaTime, Space.World);
+            }
+            if(slowTime <= 0 || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.A))
+            {
+                slowDown = false;
+            }
         }
 
         if(Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A))
@@ -134,18 +167,27 @@ public class TankMovementSideways : MonoBehaviour
         // Sets rotation when barrel is not turning to a flat number based on the 3 angles I have set
         if(turnLeft == false && turnRight == false)
         {
-            if (tankTurret.rotation.eulerAngles.y >= 269 && tankTurret.rotation.eulerAngles.y <= 271)
+            if (tankTurret.rotation.eulerAngles.y >= 260 && tankTurret.rotation.eulerAngles.y <= 280)
             {
                 tankTurret.rotation = Quaternion.Euler(0, 270, 0);
             }
-            else if (tankTurret.rotation.eulerAngles.y >= 179 && tankTurret.rotation.eulerAngles.y <= 181)
+            else if (tankTurret.rotation.eulerAngles.y >= 170 && tankTurret.rotation.eulerAngles.y <= 190)
             {
                 tankTurret.rotation = Quaternion.Euler(0, 180, 0);
             }
-            else if(tankTurret.rotation.eulerAngles.y >= 89 && tankTurret.rotation.eulerAngles.y <= 91)
+            else if(tankTurret.rotation.eulerAngles.y >= 80 && tankTurret.rotation.eulerAngles.y <= 100)
             {
                 tankTurret.rotation = Quaternion.Euler(0, 90, 0);
             }
+        }
+    }
+
+    void TankJump()
+    {
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            rb.AddForce(new Vector3(0, 10, 0), ForceMode.Impulse);
+            Debug.Log("YES");
         }
     }
 }

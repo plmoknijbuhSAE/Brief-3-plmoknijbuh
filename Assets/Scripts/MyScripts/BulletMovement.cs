@@ -37,7 +37,7 @@ public class BulletMovement : MonoBehaviour
             Instantiate(explosion, pos.position, Quaternion.identity);
             Destroy(gameObject);
         }
-        else
+        if(collision.gameObject.tag == "Player")
         {
             Physics.IgnoreCollision(pos.GetComponent<Collider>(), GameObject.FindGameObjectWithTag("Player").gameObject.GetComponent<Collider>());
         }
